@@ -38,9 +38,6 @@ window.findNRooksSolution = function(n) {
 
 // return the number of nxn chessboards that exist, with n rooks placed such that none of them can attack each other
 window.countNRooksSolutions = function(n) {
-  if (n==1) {
-    return 1;
-  }
   var board = new Board({n:n});
   var daddyTree = new Tree(board);
   var nextQueue = new Queue();
@@ -49,13 +46,12 @@ window.countNRooksSolutions = function(n) {
   var currentNode = daddyTree;
 
   while (nextQueue.size() > 0) {
-    console.log(nextQueue.size())
 //     if (nextQueue.size() === 4) { debugger; }
     currentNode = nextQueue.dequeue();
     var children = this.makeChildren(currentNode, nextQueue, masterArr);
 //     children.forEach(v => nextQueue.enqueue(v));
   }
-  return masterArr;
+  return masterArr.length;
   // create children with potential paths
   // loop thru each child to end up with non conflicting paths
   // recurse
@@ -70,22 +66,17 @@ window.makeChildren = function(tree, queue, masterArr) {
   var row = tree.row;
   var col = tree.col;
   var oldAtt = board.attributes;
-  var newAtt = {
-    0: board.attributes['0'].slice(),
-    1: board.attributes['1'].slice(),
-    2: board.attributes['2'].slice(),
-    n: board.attributes['n']
-  }
-
   for (var i = row; i < n; i++) {
     for (var j = col; j < n; j++) {
       var newBoard = new Board({n:n});
       var oldAtt = board.attributes;
-      var newAtt = {
-        0: board.attributes['0'].slice(),
-        1: board.attributes['1'].slice(),
-        2: board.attributes['2'].slice(),
-        n: board.attributes['n']
+      var newAtt = {};
+      for (var key in oldAtt) {
+        if (key === 'n') {
+          newAtt[key] = oldAtt[key];
+        } else {
+          newAtt[key] = oldAtt[key].slice()
+        }
       }
       newBoard.attributes = newAtt;
       newBoard.togglePiece(i,j);
@@ -103,12 +94,12 @@ window.makeChildren = function(tree, queue, masterArr) {
           masterArr.push(newTree);
         } else {
           tree.children.push(newTree);
-          console.log("QUEUEING NEW TREE:", newTree)
-          console.log("QUEUEING NEW TREE:", queue)
+//           console.table(newTree.board.attributes)
           queue.enqueue(newTree);
         }
       }
     }
+    col = 0;
   }
   return tree.children;
 }
